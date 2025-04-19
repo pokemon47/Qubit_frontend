@@ -22,39 +22,25 @@
 */
 
 import React from "react";
-import { NavLink } from "react-router-dom";
-// Chakra imports
+import { useNavigate } from "react-router-dom";
 import {
   Box,
   Button,
-  Checkbox,
   Flex,
-  FormControl,
-  FormLabel,
   Heading,
   Icon,
-  Input,
-  InputGroup,
-  InputRightElement,
-  Text,
   useColorModeValue,
 } from "@chakra-ui/react";
-// Custom components
-import { HSeparator } from "components/separator/Separator";
 import DefaultAuth from "layouts/auth/Default";
-// Assets
 import illustration from "assets/img/auth/auth.png";
 import { FcGoogle } from "react-icons/fc";
-import { MdOutlineRemoveRedEye } from "react-icons/md";
-import { RiEyeCloseLine } from "react-icons/ri";
+import { useAuth } from 'contexts/AuthContext';
 
 function SignIn() {
-  // Chakra color mode
+  const navigate = useNavigate();
+  const { signInWithGoogle } = useAuth();
+  
   const textColor = useColorModeValue("navy.700", "white");
-  const textColorSecondary = "gray.400";
-  const textColorDetails = useColorModeValue("navy.700", "secondaryGray.600");
-  const textColorBrand = useColorModeValue("brand.500", "white");
-  const brandStars = useColorModeValue("brand.500", "brand.400");
   const googleBg = useColorModeValue("secondaryGray.300", "whiteAlpha.200");
   const googleText = useColorModeValue("navy.700", "white");
   const googleHover = useColorModeValue(
@@ -65,8 +51,40 @@ function SignIn() {
     { bg: "secondaryGray.300" },
     { bg: "whiteAlpha.200" }
   );
-  const [show, setShow] = React.useState(false);
-  const handleClick = () => setShow(!show);
+
+  const handleGoogleSignIn = async () => {
+    // TEMPORARY: Direct login without OAuth - REMOVE IN PRODUCTION
+    await signInWithGoogle();
+    navigate('/admin/default');
+
+    /* UNCOMMENT THIS IN PRODUCTION
+    try {
+      const codeChallenge = await generateCodeChallenge();
+      
+      const params = new URLSearchParams({
+        client_id: process.env.REACT_APP_GOOGLE_CLIENT_ID,
+        redirect_uri: `${window.location.origin}/auth/callback`,
+        response_type: 'code',
+        scope: 'openid email profile',
+        code_challenge: codeChallenge,
+        code_challenge_method: 'S256',
+        access_type: 'offline',
+        prompt: 'consent',
+      });
+
+      window.location.href = `https://accounts.google.com/o/oauth2/v2/auth?${params.toString()}`;
+    } catch (error) {
+      toast({
+        title: "Authentication Error",
+        description: "Failed to initiate sign in. Please try again.",
+        status: "error",
+        duration: 5000,
+        isClosable: true,
+      });
+    }
+    */
+  };
+
   return (
     <DefaultAuth illustrationBackground={illustration} image={illustration}>
       <Flex
@@ -81,18 +99,10 @@ function SignIn() {
         px={{ base: "25px", md: "0px" }}
         mt={{ base: "40px", md: "14vh" }}
         flexDirection='column'>
-        <Box me='auto'>
-          <Heading color={textColor} fontSize='36px' mb='10px'>
-            Sign In
+        <Box me="auto" textAlign="center">
+          <Heading color={textColor} fontSize="36px" mb="10px">
+            Welcome to Qubit
           </Heading>
-          <Text
-            mb='36px'
-            ms='4px'
-            color={textColorSecondary}
-            fontWeight='400'
-            fontSize='md'>
-            Enter your email and password to sign in!
-          </Text>
         </Box>
         <Flex
           zIndex='2'
@@ -116,120 +126,11 @@ function SignIn() {
             fontWeight='500'
             _hover={googleHover}
             _active={googleActive}
-            _focus={googleActive}>
+            _focus={googleActive}
+            onClick={handleGoogleSignIn}>
             <Icon as={FcGoogle} w='20px' h='20px' me='10px' />
-            Sign in with Google
+            Sign in with Google (Dev Mode)
           </Button>
-          <Flex align='center' mb='25px'>
-            <HSeparator />
-            <Text color='gray.400' mx='14px'>
-              or
-            </Text>
-            <HSeparator />
-          </Flex>
-          <FormControl>
-            <FormLabel
-              display='flex'
-              ms='4px'
-              fontSize='sm'
-              fontWeight='500'
-              color={textColor}
-              mb='8px'>
-              Email<Text color={brandStars}>*</Text>
-            </FormLabel>
-            <Input
-              isRequired={true}
-              variant='auth'
-              fontSize='sm'
-              ms={{ base: "0px", md: "0px" }}
-              type='email'
-              placeholder='mail@simmmple.com'
-              mb='24px'
-              fontWeight='500'
-              size='lg'
-            />
-            <FormLabel
-              ms='4px'
-              fontSize='sm'
-              fontWeight='500'
-              color={textColor}
-              display='flex'>
-              Password<Text color={brandStars}>*</Text>
-            </FormLabel>
-            <InputGroup size='md'>
-              <Input
-                isRequired={true}
-                fontSize='sm'
-                placeholder='Min. 8 characters'
-                mb='24px'
-                size='lg'
-                type={show ? "text" : "password"}
-                variant='auth'
-              />
-              <InputRightElement display='flex' alignItems='center' mt='4px'>
-                <Icon
-                  color={textColorSecondary}
-                  _hover={{ cursor: "pointer" }}
-                  as={show ? RiEyeCloseLine : MdOutlineRemoveRedEye}
-                  onClick={handleClick}
-                />
-              </InputRightElement>
-            </InputGroup>
-            <Flex justifyContent='space-between' align='center' mb='24px'>
-              <FormControl display='flex' alignItems='center'>
-                <Checkbox
-                  id='remember-login'
-                  colorScheme='brandScheme'
-                  me='10px'
-                />
-                <FormLabel
-                  htmlFor='remember-login'
-                  mb='0'
-                  fontWeight='normal'
-                  color={textColor}
-                  fontSize='sm'>
-                  Keep me logged in
-                </FormLabel>
-              </FormControl>
-              <NavLink to='/auth/forgot-password'>
-                <Text
-                  color={textColorBrand}
-                  fontSize='sm'
-                  w='124px'
-                  fontWeight='500'>
-                  Forgot password?
-                </Text>
-              </NavLink>
-            </Flex>
-            <Button
-              fontSize='sm'
-              variant='brand'
-              fontWeight='500'
-              w='100%'
-              h='50'
-              mb='24px'>
-              Sign In
-            </Button>
-          </FormControl>
-          <Flex
-            flexDirection='column'
-            justifyContent='center'
-            alignItems='start'
-            maxW='100%'
-            mt='0px'>
-            <Text color={textColorDetails} fontWeight='400' fontSize='14px'>
-              Not registered yet?
-              <NavLink to='/auth/sign-up'>
-                <Text
-                  color={textColorBrand}
-                  as='span'
-                  ms='5px'
-                  fontWeight='500'>
-                  Create an Account
-                </Text>
-              </NavLink>
-            </Text>
-          </Flex>
         </Flex>
       </Flex>
     </DefaultAuth>

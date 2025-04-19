@@ -7,6 +7,27 @@ import {
 } from '@chakra-ui/react';
 import initialTheme from './theme/theme'; // { themeGreen }
 import { useState } from 'react';
+import { AuthProvider, useAuth } from 'contexts/AuthContext';
+
+// Create a protected route component
+const ProtectedRoute = ({ children }) => {
+  const { user, loading } = useAuth();
+  
+  if (loading) {
+    return <div>Loading...</div>;
+  }
+  
+  // TEMPORARY: Always allow access in development - REMOVE IN PRODUCTION
+  return children;
+
+  /* UNCOMMENT THIS IN PRODUCTION
+  if (!user) {
+    return <Navigate to="/auth/sign-in" replace />;
+  }
+  
+  return children;
+  */
+};
 
 export default function Main() {
   // eslint-disable-next-line
@@ -14,16 +35,20 @@ export default function Main() {
 
   return (
     <ChakraProvider theme={currentTheme}>
-      <Routes>
-        <Route path="auth/*" element={<AuthLayout />} />
-        <Route
-          path="admin/*"
-          element={
-            <AdminLayout theme={currentTheme} setTheme={setCurrentTheme} />
-          }
-        />
-        <Route path="/" element={<Navigate to="/admin" replace />} />
-      </Routes>
+      <AuthProvider>
+        <Routes>
+          <Route path="auth/*" element={<AuthLayout />} />
+          <Route
+            path="admin/*"
+            element={
+              <ProtectedRoute>
+                <AdminLayout theme={currentTheme} setTheme={setCurrentTheme} />
+              </ProtectedRoute>
+            }
+          />
+          <Route path="/" element={<Navigate to="/auth/sign-in" replace />} />
+        </Routes>
+      </AuthProvider>
     </ChakraProvider>
   );
 }
