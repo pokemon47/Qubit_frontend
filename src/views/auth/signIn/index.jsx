@@ -56,7 +56,7 @@ function SignIn() {
   const handleGoogleSignIn = async () => {
     // TEMPORARY: Direct login without OAuth - REMOVE IN PRODUCTION
     await signInWithGoogle();
-    navigate('/admin/default');
+    navigate('/admin/dashboard');
 
     /* UNCOMMENT THIS IN PRODUCTION
     try {

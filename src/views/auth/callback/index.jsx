@@ -41,7 +41,7 @@ function AuthCallback() {
         // Send the code and verifier to your backend
         const success = await signInWithGoogle(code, codeVerifier);
         if (success) {
-          navigate('/admin/default');
+          navigate('/admin/dashboard');
         } else {
           throw new Error('Authentication failed');
         }

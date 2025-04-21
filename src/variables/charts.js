@@ -334,3 +334,142 @@ export const lineChartOptionsTotalSpent = {
   },
   color: ["#7551FF", "#39B8FF"],
 };
+
+// ESG Performance Charts
+
+export const lineChartDataEnvironmental = [
+  {
+    name: "Carbon Emissions",
+    data: [50, 45, 42, 38, 35, 32, 30],
+  },
+  {
+    name: "Resource Usage",
+    data: [70, 65, 60, 58, 55, 52, 50],
+  }
+];
+
+export const lineChartOptionsEnvironmental = {
+  chart: {
+    toolbar: {
+      show: false,
+    },
+    type: 'line'
+  },
+  tooltip: {
+    theme: "dark",
+  },
+  xaxis: {
+    categories: ["2017", "2018", "2019", "2020", "2021", "2022", "2023"],
+    labels: {
+      style: {
+        colors: "#A3AED0",
+        fontSize: "14px",
+        fontWeight: "500",
+      },
+    },
+  },
+  yaxis: {
+    labels: {
+      style: {
+        colors: "#A3AED0",
+        fontSize: "14px",
+      },
+    },
+  },
+  grid: {
+    strokeDashArray: 5,
+  },
+  colors: ["#48BB78", "#4299E1"]
+};
+
+export const barChartDataSocial = [
+  {
+    name: "Employee Satisfaction",
+    data: [75, 78, 82, 80, 85],
+  },
+  {
+    name: "Community Impact",
+    data: [65, 70, 75, 78, 80],
+  }
+];
+
+export const barChartOptionsSocial = {
+  chart: {
+    toolbar: {
+      show: false,
+    },
+    type: 'bar',
+    stacked: false
+  },
+  tooltip: {
+    theme: "dark",
+  },
+  xaxis: {
+    categories: ["2019", "2020", "2021", "2022", "2023"],
+    labels: {
+      style: {
+        colors: "#A3AED0",
+        fontSize: "14px",
+        fontWeight: "500",
+      },
+    },
+  },
+  yaxis: {
+    labels: {
+      style: {
+        colors: "#A3AED0",
+        fontSize: "14px",
+      },
+    },
+  },
+  plotOptions: {
+    bar: {
+      borderRadius: 8,
+      columnWidth: "40px",
+    },
+  },
+  colors: ["#805AD5", "#ED64A6"]
+};
+
+export const radialChartDataGovernance = [
+  {
+    name: "Board Independence",
+    data: [85],
+  },
+  {
+    name: "Risk Management",
+    data: [78],
+  },
+  {
+    name: "Transparency",
+    data: [90],
+  }
+];
+
+export const radialChartOptionsGovernance = {
+  chart: {
+    type: 'radialBar',
+  },
+  plotOptions: {
+    radialBar: {
+      dataLabels: {
+        name: {
+          fontSize: '14px',
+          color: "#A3AED0",
+        },
+        value: {
+          fontSize: '16px',
+          color: "#2D3748",
+        },
+        total: {
+          show: true,
+          label: 'Average',
+          formatter: function (w) {
+            return Math.round(w.globals.seriesTotals.reduce((a, b) => a + b, 0) / w.globals.series.length) + '%'
+          }
+        }
+      }
+    }
+  },
+  colors: ["#3182CE", "#38B2AC", "#D53F8C"]
+};

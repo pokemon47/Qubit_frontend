@@ -10,7 +10,7 @@ import {
 } from 'react-icons/md';
 
 // Admin Imports
-import MainDashboard from 'views/admin/default';
+import Dashboard from 'views/admin/dashboard';
 import NFTMarketplace from 'views/admin/marketplace';
 import Profile from 'views/admin/profile';
 import DataTables from 'views/admin/dataTables';
@@ -22,11 +22,11 @@ import AuthCallback from 'views/auth/callback';
 
 const routes = [
   {
-    name: 'Main Dashboard',
+    name: 'Dashboard',
     layout: '/admin',
-    path: '/default',
+    path: '/dashboard',
     icon: <Icon as={MdHome} width="20px" height="20px" color="inherit" />,
-    component: <MainDashboard />,
+    component: <Dashboard />,
   },
   {
     name: 'NFT Marketplace',
