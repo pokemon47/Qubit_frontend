@@ -29,12 +29,14 @@ import {
   Tabs,
   Text,
   useColorModeValue,
-  useDisclosure,
+  useDisclosure
 } from "@chakra-ui/react";
+import axios from "axios";
 import Card from "components/card/Card";
+import LineChart from "components/charts/LineChart";
 import StockChart from 'components/charts/StockChart';
 import { useEffect, useState } from "react";
-import { FiMaximize2 } from 'react-icons/fi'; // Import expand icon from react-icons
+import { FiMaximize2 } from 'react-icons/fi';
 import { useLocation, useParams } from "react-router-dom";
 
 export function CompanyDetails() {
@@ -49,84 +51,135 @@ export function CompanyDetails() {
   const [toDate, setToDate] = useState('');
   const [tickerError, setTickerError] = useState(null);
   
-  // Modal control for expanded chart
-  const { isOpen, onOpen, onClose } = useDisclosure();
+  const [lineChartData, setLineChartData] = useState([]);
+  const [lineChartOptions, setLineChartOptions] = useState({});
+  // const [initialData, setInitialData] = useState({})
+  
+  const [companyScores, setCompanyScores] = useState({
+    esg: {
+      overall: 0,
+      environmental: 0,
+      social: 0,
+      governance: 0
+    },
+    financial: {
+      overall: 0,
+      revenue: 0,
+      profitability: 0,
+      growth: 0
+    },
+    sentiment: {
+      overall: 0,
+      media: 0,
+      social: 0,
+      employees: 0
+    }
+  });
 
-  // Color values
+  const { isOpen, onOpen, onClose } = useDisclosure();
   const textColor = useColorModeValue("navy.700", "white");
   const cardBg = useColorModeValue("white", "navy.700");
   const secondaryBg = useColorModeValue("gray.50", "navy.800");
   const borderColor = useColorModeValue("gray.200", "gray.700");
 
-  // Mock scores - will be replaced with real data later
-  const companyScores = {
-    esg: {
-      overall: 82,
-      environmental: 78,
-      social: 88,
-      governance: 80
-    },
-    financial: {
-      overall: 76,
-      revenue: 85,
-      profitability: 72,
-      growth: 71
-    },
-    sentiment: {
-      overall: 88,
-      media: 84,
-      social: 92,
-      employees: 89
-    }
-  };
-
   useEffect(() => {
-    // This would be replaced with a real API call in production
-    if (company) {
-      setLoading(false);
-    } else {
-      // If company data wasn't passed via state, fetch it using the ID
-      console.log(`Need to fetch company data for ID: ${id}`);
-      // Mock fetching company data - replace with actual API call
-      setTimeout(() => {
-        // Mock data
+    const fetchCompanyDetails = async () => {
+      try {
+        if (!company?.name) return;
+
+        const tickerRes = await fetch(`/convert/company_to_ticker?name=${encodeURIComponent(company.name)}`);
+        const tickerData = await tickerRes.json();
+        const symbol = tickerData?.ticker;
+
+        if (!symbol) {
+          setTickerError("Ticker not found");
+          return;
+        }
+
+        setTicker(symbol);
+
+        const response = await axios.get(`https://gh4vkppgue.execute-api.us-east-1.amazonaws.com/prod/api/esg/${symbol}`);
+        const esgData = response.data.historical_ratings[0];
+
+        const esg = {
+          overall: esgData.rating,
+          environmental: esgData.environmental_score,
+          social: esgData.social_score,
+          governance: esgData.governance_score,
+        };
+
+        setCompanyScores(prev => ({
+          ...prev,
+          esg
+        }));
+
+        const ratings = response.data.historical_ratings;
+        const sortedRatings = [...ratings].sort(
+          (a, b) => new Date(a.timestamp) - new Date(b.timestamp)
+        );
+
+        const initialData = {
+          esgHistory: sortedRatings.map(entry => ({
+            date: entry.timestamp,
+            value: entry.total_score
+          }))
+        };
+
+        // line chart:
+        setLineChartData([{
+          name: "Portfolio Value",
+          data:  initialData.esgHistory.map(entry => entry.value)
+        }]);
+        
+        setLineChartOptions({
+          chart: { toolbar: { show: false }, type: 'line' },
+          xaxis: {
+            categories: initialData.esgHistory.map(item =>
+              new Date(item.date).toLocaleDateString('en-AU', { day: '2-digit', month: 'short' })
+            ),
+            labels: { style: { colors: "#A3AED0", fontSize: "12px", fontWeight: "500" } }
+          },
+          yaxis: {
+            title: { text: 'Value (AUD)', style: { color: "#A3AED0" } },
+            labels: {
+              formatter: value => 'AUD ' + value.toLocaleString(),
+              style: { colors: "#A3AED0", fontSize: "12px", fontWeight: "500" }
+            }
+          },
+          tooltip: {
+            y: { formatter: value => 'AUD ' + value.toLocaleString() }
+          }
+        });
+      } catch (err) {
+        console.error("Error in company detail fetch:", err);
+        setTickerError("Error fetching data");
+      } finally {
         setLoading(false);
-      }, 800);
-    }
-  }, [id, company]);
+      }
+    };
+
+    fetchCompanyDetails();
+  }, [id, company?.name]);
 
   useEffect(() => {
     const fetchNews = async () => {
       try {
         if (!company?.name) return;
-        
-        console.log(`Fetching news for company: ${company.name}`);
-        
+
         const response = await fetch(
           `/company/${encodeURIComponent(company.name)}?api_key=hrppk6zHXrrFYM3CHqx0_Q`
         );
-    
+
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
-    
+
         const rawText = await response.text();
-        if (!rawText) {
-          console.error("Empty response from API");
-          return;
-        }
-    
-        // Check for HTML response
-        if (rawText.trim().startsWith('<!DOCTYPE') || rawText.trim().startsWith('<')) {
-          console.error("Received HTML instead of JSON");
-          return;
-        }
-    
-        // Parse JSON
+        if (!rawText) return;
+
+        if (rawText.trim().startsWith('<!DOCTYPE') || rawText.trim().startsWith('<')) return;
+
         const data = JSON.parse(rawText);
-        console.log("Parsed data:", data);
-    
-        // Update state - limit to 4 articles for the detail page
         if (data?.events?.length > 0) {
           setNewsArticles(data.events.slice(0, 4));
         }
@@ -149,42 +202,13 @@ export function CompanyDetails() {
     setToDate(formatDate(today));
   }, []);
 
-  useEffect(() => {
-    if (company?.name) {
-      fetch(`/convert/company_to_ticker?name=${encodeURIComponent(company.name)}`)
-        .then(response => {
-          if (!response.ok) {
-            throw new Error('Failed to fetch ticker');
-          }
-          return response.json();
-        })
-        .then(data => {
-          if (data.ticker) {
-            setTicker(data.ticker);
-          } else {
-            setTickerError('Ticker not found');
-          }
-        })
-        .catch(error => {
-          console.error('Error fetching ticker:', error);
-          setTickerError('Error fetching ticker');
-        });
-    }
-  }, [company?.name]);
-
-  // Format date function
   const formatDateTime = (timestamp) => {
     if (!timestamp) return 'Unknown';
     const date = new Date(timestamp);
-    const options = { 
-      year: 'numeric', 
-      month: 'short', 
-      day: 'numeric'
-    };
+    const options = { year: 'numeric', month: 'short', day: 'numeric' };
     return date.toLocaleDateString('en-US', options);
   };
 
-  // Score card styles
   const scoreCardStyle = {
     p: "20px",
     borderRadius: "16px",
@@ -209,12 +233,13 @@ export function CompanyDetails() {
     );
   }
 
+
   return (
     <Container maxW="container.xl" pt={{ base: "130px", md: "80px", xl: "80px" }} pb={10}>
-      <Button 
-        leftIcon={<ArrowBackIcon />} 
-        variant="ghost" 
-        mb={6} 
+      <Button
+        leftIcon={<ArrowBackIcon />}
+        variant="ghost"
+        mb={6}
         onClick={() => window.history.back()}
       >
         Back
@@ -295,9 +320,17 @@ export function CompanyDetails() {
                   </Flex>
                 )}
               </Box>
-            </Box>
 
-            
+              {/* New Portfolio Value Line Chart */}
+              {lineChartData?.[0]?.data?.length > 0 && lineChartOptions?.xaxis?.categories?.length > 0 && (
+                <Card p="20px">
+                  <Text color={textColor} fontSize="lg" fontWeight="700" mb="4">
+                    ESG Scores History
+                  </Text>
+                  <LineChart chartData={lineChartData} chartOptions={lineChartOptions} />
+                </Card>
+              )}
+            </Box>
 
             {/* Top News Preview */}
             <Box mb={8}>
@@ -356,7 +389,7 @@ export function CompanyDetails() {
               <SimpleGrid columns={{ base: 1, md: 4 }} spacing={6}>
                 <Card {...scoreCardStyle}>
                   <Stat>
-                    <StatLabel>Overall ESG</StatLabel>
+                    <StatLabel>Overall ESG Rating</StatLabel>
                     <StatNumber color="green.500">{companyScores.esg.overall}</StatNumber>
                   </Stat>
                 </Card>
