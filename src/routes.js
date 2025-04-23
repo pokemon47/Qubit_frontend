@@ -72,7 +72,8 @@ const routes = [
   {
     name: 'Company Details',
     layout: '/admin',
-    path: '/company/:companyId',
+    // path: '/company/:companyId',
+    path: '/company/:companyName',
     icon: <Icon as={MdBusiness} width="20px" height="20px" color="inherit" />,
     component: <CompanyDetails />,
     hideInNav: true, // Hide from navigation sidebar

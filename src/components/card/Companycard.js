@@ -80,7 +80,8 @@ function CompanyCard({ company }) {
 
   const handleViewDetails = () => {
     console.log("Navigating to company ID:", company.id);
-    navigate(`/admin/company/${company.id}`);
+    // navigate(`/admin/company/${company.id}`);
+    navigate(`/admin/company/${company.id}`, { state: { company } });
   };
 
   // Format date function
