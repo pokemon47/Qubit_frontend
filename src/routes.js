@@ -7,6 +7,8 @@ import {
   MdHome,
   MdLock,
   MdOutlineShoppingCart,
+  MdSearch,
+  MdBusiness,
 } from 'react-icons/md';
 
 // Admin Imports
@@ -14,6 +16,8 @@ import Dashboard from 'views/admin/dashboard';
 import NFTMarketplace from 'views/admin/marketplace';
 import Profile from 'views/admin/profile';
 import DataTables from 'views/admin/dataTables';
+import SearchResults from 'components/navbar/SearchResults'; // Import the new search results component
+import CompanyDetails from 'components/navbar/CompanyDetails';
 
 
 // Auth Imports
@@ -56,6 +60,22 @@ const routes = [
     path: '/profile',
     icon: <Icon as={MdPerson} width="20px" height="20px" color="inherit" />,
     component: <Profile />,
+  },
+  {
+    name: 'Search Results',
+    layout: '/admin',
+    path: '/search-results',
+    icon: <Icon as={MdSearch} width="20px" height="20px" color="inherit" />,
+    component: <SearchResults />,
+    hideInNav: true, // Hide from navigation sidebar
+  },
+  {
+    name: 'Company Details',
+    layout: '/admin',
+    path: '/company/:companyId',
+    icon: <Icon as={MdBusiness} width="20px" height="20px" color="inherit" />,
+    component: <CompanyDetails />,
+    hideInNav: true, // Hide from navigation sidebar
   },
   {
     name: 'Sign In',
