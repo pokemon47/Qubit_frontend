@@ -1,21 +1,23 @@
-import React, { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { ExternalLinkIcon } from '@chakra-ui/icons';
+import axios from "axios";
+
 import {
+  Badge,
   Box,
+  Button,
+  Divider,
   Flex,
   Heading,
-  Text,
-  Button,
-  useColorModeValue,
-  Spinner,
-  Badge,
-  Link,
   Icon,
-  Divider,
+  Link,
   SimpleGrid,
+  Spinner,
+  Text,
+  useColorModeValue,
 } from "@chakra-ui/react";
-import { ExternalLinkIcon } from '@chakra-ui/icons';
 import Card from "components/card/Card";
+import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 function CompanyCard({ company }) {
   const navigate = useNavigate();
@@ -23,6 +25,12 @@ function CompanyCard({ company }) {
   const cardBg = useColorModeValue("white", "navy.700");
   const newsCardBg = useColorModeValue("gray.50", "navy.800");
   const newsCardHoverBg = useColorModeValue("gray.100", "navy.900");
+  const [scores, setScores] = useState({
+    esg: 0,
+    financial: 0,
+    sentiment: 0
+  });
+  
   
   // Mock scores - will be replaced with real data later
   const exampleScores = {
@@ -68,6 +76,15 @@ function CompanyCard({ company }) {
         if (data?.events?.length > 0) {
           setNewsArticles(data.events.slice(0, 2));
         }
+
+        // get the esg score:
+        const symbol = company.ticker;
+        const esgRes = await axios.get(`https://gh4vkppgue.execute-api.us-east-1.amazonaws.com/prod/api/esg/${symbol}`);
+        const esg = esgRes.data.historical_ratings[0].total_score;
+        setScores({
+          ... scores,
+          esg
+        })
       } catch (err) {
         console.error("Failed to fetch company news:", err);
       } finally {
@@ -140,15 +157,15 @@ function CompanyCard({ company }) {
         <SimpleGrid columns={3} spacing={4} mb={6}>
           <Box {...scoreCardStyle}>
             <Text fontSize="xs" color="gray.500" mb={1}>ESG Score</Text>
-            <Text fontWeight="bold" fontSize="xl" color="green.500">{exampleScores.esg}</Text>
+            <Text fontWeight="bold" fontSize="xl" color="green.500">{scores.esg}</Text>
           </Box>
           <Box {...scoreCardStyle}>
             <Text fontSize="xs" color="gray.500" mb={1}>Financial</Text>
-            <Text fontWeight="bold" fontSize="xl" color="blue.500">{exampleScores.financial}</Text>
+            <Text fontWeight="bold" fontSize="xl" color="blue.500">{scores.financial}</Text>
           </Box>
           <Box {...scoreCardStyle}>
             <Text fontSize="xs" color="gray.500" mb={1}>Sentiment</Text>
-            <Text fontWeight="bold" fontSize="xl" color="purple.500">{exampleScores.sentiment}</Text>
+            <Text fontWeight="bold" fontSize="xl" color="purple.500">{scores.sentiment}</Text>
           </Box>
         </SimpleGrid>
 

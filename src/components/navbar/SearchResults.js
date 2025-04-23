@@ -1,15 +1,14 @@
-import React, { useEffect, useState } from "react";
-import { useSearchParams } from "react-router-dom";
 import {
-  Box,
-  Heading,
-  Text,
-  SimpleGrid,
-  Spinner,
   Center,
   Container,
+  Heading,
+  SimpleGrid,
+  Spinner,
+  Text
 } from "@chakra-ui/react";
 import CompanyCard from "components/card/Companycard"; // Assuming you have a Card component in your project
+import { useEffect, useState } from "react";
+import { useSearchParams } from "react-router-dom";
 
 function SearchResults() {
   const [searchParams] = useSearchParams();
@@ -17,6 +16,17 @@ function SearchResults() {
   
   const [results, setResults] = useState([]);
   const [loading, setLoading] = useState(true);
+
+  const getTicker = async (name) => {
+    try {
+      const response = await fetch(`/convert/company_to_ticker?name=${encodeURIComponent(name)}`);
+      const data = await response.json();
+      return data.ticker || null;
+    } catch (error) {
+      console.error("Failed to get ticker for:", name, error);
+      return null;
+    }
+  };
 
   useEffect(() => {
     setLoading(true);
@@ -29,9 +39,10 @@ function SearchResults() {
         // setResults(response.data);
         
         // Mocked results for demonstration
-        setTimeout(() => {
+        setTimeout(async () => {
+          const ticker = await getTicker(query);
           setResults([
-            { id: 1, name: `${query}`, description: "Description here", industry: "Technology" },
+            { id: 1, name: `${query}`, description: "Description here", industry: "Technology", ticker },
           ]);
           setLoading(false);
         }, 800);
