@@ -96,7 +96,7 @@ export default function Dashboard() {
     if (!arr.length) return 0;
     console.log(arr);
     const total = arr.reduce((sum, item) => sum + (item[key] || 0), 0);
-    return total / arr.length;
+    return Math.round ( total / arr.length ) ;
   }
 
   const fetchInitialData = async () => {
@@ -301,7 +301,7 @@ export default function Dashboard() {
     <Box pt={{ base: "130px", md: "80px", xl: "80px" }}>
       <SimpleGrid columns={{ base: 1, md: 2, lg: 4 }} gap='20px' mb='20px'>
         <MiniStatistics name="Portfolio Value" value={`$${summaryData.totalValue.toLocaleString()}`}/>
-        <MiniStatistics name="ESG Score" value={summaryData.avgESG} />
+        <MiniStatistics name="ESG Score %" value={summaryData.avgESG} />
         <MiniStatistics name="Financial Score" value={summaryData.avgFinancial} />
         <MiniStatistics name="Public Sentiment" value={summaryData.avgSentiment} />
       </SimpleGrid>
