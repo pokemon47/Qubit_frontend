@@ -31,7 +31,6 @@ import LineChart from "components/charts/LineChart";
 import PieChart from "components/charts/PieChart";
 
 const apikeySentiment = "ade3668a3d3b62e96858f79361c35f75657285b4c251e94d660ffe9f29120d40";
-
 let initialData = {
   valueHistory: [
     { date: "2025-04-14", value: 1450 },
@@ -42,15 +41,6 @@ let initialData = {
     { date: "2025-04-19", value: 3095 },
     { date: "2025-04-20", value: 4500 }
   ],
-  carbonEmissions: [
-    { date: "Mon", value: 250 },
-    { date: "Tue", value: 230 },
-    { date: "Wed", value: 220 },
-    { date: "Thu", value: 240 },
-    { date: "Fri", value: 235 },
-    { date: "Sat", value: 225 },
-    { date: "Sun", value: 220 }
-  ]
 };
 
 const initialSymbols = [
@@ -77,6 +67,9 @@ export default function Dashboard() {
   const [lineChartData, setLineChartData] = useState([]);
   const [lineChartOptions, setLineChartOptions] = useState({});
 
+  const [barChartData, setBarChartData] = useState([]);
+  const [barChartOptions, setBarChartOptions] = useState({});
+
   const getDailyChange = async (symbol) => {
     const today = new Date();
     const yesterday = new Date();
@@ -99,6 +92,12 @@ export default function Dashboard() {
 
   };
   
+  function getAverage(arr, key) {
+    if (!arr.length) return 0;
+    console.log(arr);
+    const total = arr.reduce((sum, item) => sum + (item[key] || 0), 0);
+    return total / arr.length;
+  }
 
   const fetchInitialData = async () => {
     try {
@@ -108,6 +107,10 @@ export default function Dashboard() {
           const currentPrice = overviewRes.data.currentPrice;
           const name = overviewRes.data.name;
           const { dailyChange, dailyChangePercent } = await getDailyChange(symbol);
+
+          const esgRes = await axios.get(`https://gh4vkppgue.execute-api.us-east-1.amazonaws.com/prod/api/esg/${symbol}`);
+          const esgData = esgRes.data.historical_ratings[0].total_score;
+
           return {
             symbol,
             name,
@@ -118,17 +121,21 @@ export default function Dashboard() {
             value: currentPrice * units,
             esgScore: 85,
             financialScore: 78,
-            sentimentScore: 92
+            sentimentScore: 92,
+            esg: Math.round(( esgData / 30 ) * 100)
           };
         })
       );
 
       setCompanies(updatedCompanies);
       const totalValue = updatedCompanies.reduce((sum, c) => sum + c.currentPrice * c.units, 0);
+      const avgESG = getAverage(updatedCompanies, "esg");
       setSummaryData(prev => ({
         ...prev,
-        totalValue
+        totalValue,
+        avgESG
       }));
+
     } catch (err) {
       console.log("Failed to fetch initial data", err);
     }
@@ -151,12 +158,16 @@ export default function Dashboard() {
       const updatedCompanies = [...companies];
       const index = updatedCompanies.findIndex(c => c.symbol.toLowerCase() === symbol.toLowerCase());
 
+      const esgRes = await axios.get(`https://gh4vkppgue.execute-api.us-east-1.amazonaws.com/prod/api/esg/${symbolUpper}`);
+      const esgData = esgRes.data.historical_ratings[0].total_score;
+
       if (index !== -1) {
         updatedCompanies[index].units += Number(units);
         updatedCompanies[index].currentPrice = currentPrice;
         updatedCompanies[index].dailyChange = dailyChange;
         updatedCompanies[index].dailyChangePercent = dailyChangePercent;
         updatedCompanies[index].value += currentPrice * Number(units)
+        updatedCompanies[index].esg = esgData;
       } else {
         updatedCompanies.push({
           symbol: symbolUpper,
@@ -168,20 +179,26 @@ export default function Dashboard() {
           value: currentPrice * Number(units),
           esgScore: 85,
           financialScore: 78,
-          sentimentScore: 92
+          sentimentScore: 92,
+          esg: Math.round(( esgData / 30 ) * 100)
         });
       }
 
       setCompanies(updatedCompanies);
       console.log(companies);
       const totalValue = updatedCompanies.reduce((sum, c) => sum + c.currentPrice * c.units, 0);
+      const avgESG = getAverage(updatedCompanies, "esg");
+
       setSummaryData(prev => ({
         ...prev,
-        totalValue
+        totalValue,
+        avgESG
       }));
+
       setSymbol("");
       setUnits("");
       onClose();
+
     } catch (err) {
       console.error("API error:", err);
       setError(true);
@@ -251,33 +268,34 @@ export default function Dashboard() {
         y: { formatter: value => 'AUD ' + value.toLocaleString() }
       }
     });
+
+    // BAR CHART
+    setBarChartData([{
+        name: "ESG Comparisons",
+        data: companies.map(item => item.esg)
+    }])
+
+    setBarChartOptions({
+      chart: { toolbar: { show: false }, type: 'bar' },
+      plotOptions: {
+        bar: { borderRadius: 5, columnWidth: '40%' }
+      },
+      dataLabels: { enabled: false },
+      xaxis: {
+        categories: companies.map(item => item.name),
+        labels: { style: { colors: "#A3AED0", fontSize: "12px", fontWeight: "500" } }
+      },
+      yaxis: {
+        title: { text: 'ESG Scores %', style: { color: "#A3AED0" } },
+        labels: {
+          formatter: value => value,
+          style: { colors: "#A3AED0", fontSize: "12px", fontWeight: "500" }
+        }
+      },
+      tooltip: { y: { formatter: value => value } }
+    });
+    
   }, [companies, summaryData.totalValue]);
-
-
-  const barChartData = [{
-    name: "Carbon Emissions",
-    data: initialData.carbonEmissions.map(item => item.value)
-  }];
-
-  const barChartOptions = {
-    chart: { toolbar: { show: false }, type: 'bar' },
-    plotOptions: {
-      bar: { borderRadius: 5, columnWidth: '40%' }
-    },
-    dataLabels: { enabled: false },
-    xaxis: {
-      categories: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
-      labels: { style: { colors: "#A3AED0", fontSize: "12px", fontWeight: "500" } }
-    },
-    yaxis: {
-      title: { text: 'Carbon Emissions (tons)', style: { color: "#A3AED0" } },
-      labels: {
-        formatter: value => value + ' tons',
-        style: { colors: "#A3AED0", fontSize: "12px", fontWeight: "500" }
-      }
-    },
-    tooltip: { y: { formatter: value => value + ' tons' } }
-  };
 
   return (
     <Box pt={{ base: "130px", md: "80px", xl: "80px" }}>
@@ -304,7 +322,7 @@ export default function Dashboard() {
         </Card>
 
         <Card p='20px'>
-          <Text color={textColor} fontSize='lg' fontWeight='700' mb='4'>Carbon Emissions</Text>
+          <Text color={textColor} fontSize='lg' fontWeight='700' mb='4'>ESG Scores</Text>
           <BarChart h='300px' w='100%' chartData={barChartData} chartOptions={barChartOptions} />
         </Card>
       </SimpleGrid>
@@ -321,7 +339,7 @@ export default function Dashboard() {
                 <th style={{ textAlign: 'left', padding: '12px' }}>Company</th>
                 <th style={{ textAlign: 'right', padding: '12px' }}>Today's Change</th>
                 <th style={{ textAlign: 'right', padding: '12px' }}>Market Value</th>
-                <th style={{ textAlign: 'right', padding: '12px' }}>ESG Score</th>
+                <th style={{ textAlign: 'right', padding: '12px' }}>ESG Score %</th>
                 <th style={{ textAlign: 'right', padding: '12px' }}>Financial Score</th>
                 <th style={{ textAlign: 'right', padding: '12px' }}>Sentiment Score</th>
               </tr>
@@ -344,7 +362,7 @@ export default function Dashboard() {
                     )}
                   </td>
                   <td style={{ textAlign: 'right', padding: '12px' }}>${company.value.toLocaleString()}</td>
-                  <td style={{ textAlign: 'right', padding: '12px' }}>{company.esgScore}</td>
+                  <td style={{ textAlign: 'right', padding: '12px' }}>{company.esg}</td>
                   <td style={{ textAlign: 'right', padding: '12px' }}>{company.financialScore}</td>
                   <td style={{ textAlign: 'right', padding: '12px' }}>{company.sentimentScore}</td>
                 </tr>
@@ -354,7 +372,7 @@ export default function Dashboard() {
         </Box>
       </Card>
 
-      
+      {/* Add Stock Modal */}
       <Modal isOpen={isOpen} onClose={onClose} isCentered scrollBehavior="inside">
         <ModalOverlay bg="blackAlpha.300" backdropFilter="blur(2px)" />
         <ModalContent>
