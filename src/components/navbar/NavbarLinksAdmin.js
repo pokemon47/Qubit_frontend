@@ -4,28 +4,23 @@ import {
   Button,
   Flex,
   Icon,
-  Image,
-  Link,
   Menu,
   MenuButton,
   MenuItem,
   MenuList,
   Text,
-  useColorModeValue,
   useColorMode,
-  Box,
+  useColorModeValue
 } from '@chakra-ui/react';
 // Custom Components
 import { ItemContent } from 'components/menu/ItemContent';
 import { SearchBar } from 'components/navbar/searchBar/SearchBar';
 import { SidebarResponsive } from 'components/sidebar/Sidebar';
 import PropTypes from 'prop-types';
-import React from 'react';
 // Assets
-import navImage from 'assets/img/layout/Navbar.png';
-import { MdNotificationsNone, MdInfoOutline } from 'react-icons/md';
-import { IoMdMoon, IoMdSunny } from 'react-icons/io';
 import { FaEthereum } from 'react-icons/fa';
+import { IoMdMoon, IoMdSunny } from 'react-icons/io';
+import { MdNotificationsNone } from 'react-icons/md';
 import routes from 'routes';
 
 export default function HeaderLinks(props) {
@@ -244,7 +239,7 @@ export default function HeaderLinks(props) {
         </MenuList>
       </Menu>
 
-      {process.env.NODE_ENV === 'development' && (
+      {/* {process.env.NODE_ENV === 'development' && (
         <Box
           px={3}
           py={1}
@@ -255,8 +250,8 @@ export default function HeaderLinks(props) {
           fontWeight="bold"
         >
           DEV MODE
-        </Box>
-      )}
+        </Box> */}
+      {/* )} */}
     </Flex>
   );
 }
