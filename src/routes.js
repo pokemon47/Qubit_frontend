@@ -1,27 +1,18 @@
-import React from 'react';
 
 import { Icon } from '@chakra-ui/react';
 import {
-  MdBarChart,
-  MdPerson,
-  MdHome,
-  MdLock,
-  MdOutlineShoppingCart,
-  MdSearch,
   MdBusiness,
+  MdHome,
+  MdSearch
 } from 'react-icons/md';
 
 // Admin Imports
-import Dashboard from 'views/admin/dashboard';
-import NFTMarketplace from 'views/admin/marketplace';
-import Profile from 'views/admin/profile';
-import DataTables from 'views/admin/dataTables';
-import SearchResults from 'components/navbar/SearchResults'; // Import the new search results component
 import CompanyDetails from 'components/navbar/CompanyDetails';
+import SearchResults from 'components/navbar/SearchResults'; // Import the new search results component
+import Dashboard from 'views/admin/dashboard';
 
 
 // Auth Imports
-import SignInCentered from 'views/auth/signIn';
 import AuthCallback from 'views/auth/callback';
 
 const routes = [
@@ -33,41 +24,12 @@ const routes = [
     component: <Dashboard />,
   },
   {
-    name: 'NFT Marketplace',
-    layout: '/admin',
-    path: '/nft-marketplace',
-    icon: (
-      <Icon
-        as={MdOutlineShoppingCart}
-        width="20px"
-        height="20px"
-        color="inherit"
-      />
-    ),
-    component: <NFTMarketplace />,
-    secondary: true,
-  },
-  {
-    name: 'Data Tables',
-    layout: '/admin',
-    icon: <Icon as={MdBarChart} width="20px" height="20px" color="inherit" />,
-    path: '/data-tables',
-    component: <DataTables />,
-  },
-  {
-    name: 'Profile',
-    layout: '/admin',
-    path: '/profile',
-    icon: <Icon as={MdPerson} width="20px" height="20px" color="inherit" />,
-    component: <Profile />,
-  },
-  {
     name: 'Search Results',
     layout: '/admin',
     path: '/search-results',
     icon: <Icon as={MdSearch} width="20px" height="20px" color="inherit" />,
     component: <SearchResults />,
-    hideInNav: true, // Hide from navigation sidebar
+    hideInNav: true,
   },
   {
     name: 'Company Details',
@@ -76,14 +38,7 @@ const routes = [
     path: '/company/:companyName',
     icon: <Icon as={MdBusiness} width="20px" height="20px" color="inherit" />,
     component: <CompanyDetails />,
-    hideInNav: true, // Hide from navigation sidebar
-  },
-  {
-    name: 'Sign In',
-    layout: '/auth',
-    path: '/sign-in',
-    icon: <Icon as={MdLock} width="20px" height="20px" color="inherit" />,
-    component: <SignInCentered />,
+    hideInNav: true,
   },
   {
     name: 'Auth Callback',

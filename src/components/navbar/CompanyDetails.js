@@ -1,43 +1,43 @@
-import React, { useEffect, useState } from "react";
-import { useParams, useLocation } from "react-router-dom";
+import { ArrowBackIcon, ExternalLinkIcon } from '@chakra-ui/icons';
 import {
+  Badge,
   Box,
+  Button,
   Container,
   Flex,
   Heading,
-  Text,
+  Icon,
+  IconButton,
+  Link,
+  Modal,
+  ModalBody,
+  ModalCloseButton,
+  ModalContent,
+  ModalFooter,
+  ModalHeader,
+  ModalOverlay,
   SimpleGrid,
+  Spinner,
   Stat,
+  StatHelpText,
   StatLabel,
   StatNumber,
-  StatHelpText,
-  Spinner,
-  Badge,
-  Link,
-  Icon,
-  Button,
-  useColorModeValue,
   Tab,
-  Tabs,
   TabList,
   TabPanel,
   TabPanels,
-  Modal,
-  ModalOverlay,
-  ModalContent,
-  ModalHeader,
-  ModalFooter,
-  ModalBody,
-  ModalCloseButton,
-  IconButton,
+  Tabs,
+  Text,
+  useColorModeValue,
   useDisclosure,
 } from "@chakra-ui/react";
-import { ExternalLinkIcon, ArrowBackIcon, ExpandIcon } from '@chakra-ui/icons';
-import { FiMaximize2 } from 'react-icons/fi'; // Import expand icon from react-icons
 import Card from "components/card/Card";
 import StockChart from 'components/charts/StockChart';
+import { useEffect, useState } from "react";
+import { FiMaximize2 } from 'react-icons/fi'; // Import expand icon from react-icons
+import { useLocation, useParams } from "react-router-dom";
 
-function CompanyDetails() {
+export function CompanyDetails() {
   const { id } = useParams();
   const location = useLocation();
   const company = location.state?.company;
