@@ -7,25 +7,30 @@ import {
   MdHome,
   MdLock,
   MdOutlineShoppingCart,
+  MdSearch,
+  MdBusiness,
 } from 'react-icons/md';
 
 // Admin Imports
-import MainDashboard from 'views/admin/default';
+import Dashboard from 'views/admin/dashboard';
 import NFTMarketplace from 'views/admin/marketplace';
 import Profile from 'views/admin/profile';
 import DataTables from 'views/admin/dataTables';
-import RTL from 'views/admin/rtl';
+import SearchResults from 'components/navbar/SearchResults'; // Import the new search results component
+import CompanyDetails from 'components/navbar/CompanyDetails';
+
 
 // Auth Imports
 import SignInCentered from 'views/auth/signIn';
+import AuthCallback from 'views/auth/callback';
 
 const routes = [
   {
-    name: 'Main Dashboard',
+    name: 'Dashboard',
     layout: '/admin',
-    path: '/default',
+    path: '/dashboard',
     icon: <Icon as={MdHome} width="20px" height="20px" color="inherit" />,
-    component: <MainDashboard />,
+    component: <Dashboard />,
   },
   {
     name: 'NFT Marketplace',
@@ -57,6 +62,23 @@ const routes = [
     component: <Profile />,
   },
   {
+    name: 'Search Results',
+    layout: '/admin',
+    path: '/search-results',
+    icon: <Icon as={MdSearch} width="20px" height="20px" color="inherit" />,
+    component: <SearchResults />,
+    hideInNav: true, // Hide from navigation sidebar
+  },
+  {
+    name: 'Company Details',
+    layout: '/admin',
+    // path: '/company/:companyId',
+    path: '/company/:companyName',
+    icon: <Icon as={MdBusiness} width="20px" height="20px" color="inherit" />,
+    component: <CompanyDetails />,
+    hideInNav: true, // Hide from navigation sidebar
+  },
+  {
     name: 'Sign In',
     layout: '/auth',
     path: '/sign-in',
@@ -64,11 +86,11 @@ const routes = [
     component: <SignInCentered />,
   },
   {
-    name: 'RTL Admin',
-    layout: '/rtl',
-    path: '/rtl-default',
-    icon: <Icon as={MdHome} width="20px" height="20px" color="inherit" />,
-    component: <RTL />,
+    name: 'Auth Callback',
+    layout: '/auth',
+    path: '/callback',
+    component: <AuthCallback />,
+    hideInNav: true,
   },
 ];
 
