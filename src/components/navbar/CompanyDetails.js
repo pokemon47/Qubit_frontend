@@ -108,11 +108,20 @@ export function CompanyDetails() {
           governance: esgData.governance_score,
         };
 
-        setCompanyScores(prev => ({
-          ...prev,
-          esg
-        }));
-
+         // Fetch financial score from the new API
+         const financialScoreRes = await fetch(`http://170.64.162.86/financial-score?ticker=${symbol}`);
+         const financialScoreData = await financialScoreRes.json();
+         
+         // Update company scores with both ESG and financial data
+         setCompanyScores(prev => ({
+           ...prev,
+           esg,
+           financial: {
+             ...prev.financial,
+             overall: financialScoreData.score
+           }
+         }));
+         
         const ratings = response.data.historical_ratings;
         const sortedRatings = [...ratings].sort(
           (a, b) => new Date(a.timestamp) - new Date(b.timestamp)
@@ -181,7 +190,7 @@ export function CompanyDetails() {
 
         const data = JSON.parse(rawText);
         if (data?.events?.length > 0) {
-          setNewsArticles(data.events.slice(0, 4));
+          setNewsArticles(data.events.slice(0, 8));
         }
       } catch (err) {
         console.error("Failed to fetch company news:", err);
@@ -341,7 +350,7 @@ export function CompanyDetails() {
                 </Flex>
               ) : newsArticles.length > 0 ? (
                 <SimpleGrid columns={{ base: 1, md: 2 }} spacing={6}>
-                  {newsArticles.slice(0, 2).map((article, idx) => (
+                  {newsArticles.slice(0, 4).map((article, idx) => (
                     <Box 
                       key={idx} 
                       p={5} 
