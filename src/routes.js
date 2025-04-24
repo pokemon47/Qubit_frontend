@@ -53,6 +53,22 @@ const routes = [
     hideInNav: true,
   },
   {
+    name: 'Profile',
+    layout: '/admin',
+    path: '/profile',
+    icon: <Icon as={MdPerson} width="20px" height="20px" color="inherit" />,
+    component: <Profile />,
+    hideInNav: true
+  },
+  {
+    name: 'Sign In',
+    layout: '/auth',
+    path: '/sign-in',
+    icon: <Icon as={MdLock} width="20px" height="20px" color="inherit" />,
+    component: <SignInCentered />,
+    hideInNav: true
+  },
+  {
     name: 'Auth Callback',
     layout: '/auth',
     path: '/callback',
