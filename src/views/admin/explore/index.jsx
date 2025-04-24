@@ -42,22 +42,6 @@ export default function Explore() {
       ticker: "GOOGL",
       industry: "Technology",
       description: "Alphabet Inc. provides various products and platforms in the United States, Europe, the Middle East, Africa, and Asia Pacific."
-    },
-    {
-      id: 5,
-      name: "Meta Platforms Inc.",
-      cname: "Meta",
-      ticker: "META",
-      industry: "Technology",
-      description: "Meta Platforms, Inc. develops products that enable people to connect and share with friends and family through mobile devices, personal computers, and other surfaces worldwide."
-    },
-    {
-      id: 6,
-      name: "Tesla Inc.",
-      cname: "Tesla",
-      ticker: "TSLA",
-      industry: "Automotive",
-      description: "Tesla, Inc. designs, develops, manufactures, leases, and sells electric vehicles, and energy generation and storage systems worldwide."
     }
   ];
 
