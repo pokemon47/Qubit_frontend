@@ -8,7 +8,7 @@ export function SidebarBrand() {
   return (
     <Flex align='center' direction='column'>
       <Text fontSize="2xl" fontWeight="bold" color={textColor} my="32px">
-        Qubit
+        ESGenius
       </Text>
       <HSeparator mb='20px' />
     </Flex>

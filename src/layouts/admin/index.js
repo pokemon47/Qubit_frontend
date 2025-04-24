@@ -133,7 +133,7 @@ export default function Dashboard(props) {
               <Box>
                 <Navbar
                   onOpen={onOpen}
-                  logoText={'Qubit Dashboard'}
+                  logoText={'ESGenius Dashboard'}
                   brandText={getActiveRoute(routes)}
                   secondary={getActiveNavbar(routes)}
                   message={getActiveNavbarText(routes)}

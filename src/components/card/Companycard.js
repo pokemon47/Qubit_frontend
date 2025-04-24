@@ -33,11 +33,11 @@ function CompanyCard({ company }) {
   
   
   // Mock scores - will be replaced with real data later
-  const exampleScores = {
-    esg: 82,
-    financial: 76,
-    sentiment: 88,
-  };
+//   const exampleScores = {
+//     esg: 82,
+//     financial: 76,
+//     sentiment: 88,
+//   };
 
   // News state
   const [newsArticles, setNewsArticles] = useState([]);
@@ -81,9 +81,14 @@ function CompanyCard({ company }) {
         const symbol = company.ticker;
         const esgRes = await axios.get(`https://gh4vkppgue.execute-api.us-east-1.amazonaws.com/prod/api/esg/${symbol}`);
         const esg = esgRes.data.historical_ratings[0].total_score;
+        const financialScoreRes = await fetch(`http://170.64.162.86/financial-score?ticker=${symbol}`);
+        const financialScoreData = await financialScoreRes.json();
+        const financial = financialScoreData.score;
+        
         setScores({
           ... scores,
-          esg
+          esg,
+          financial,  
         })
       } catch (err) {
         console.error("Failed to fetch company news:", err);

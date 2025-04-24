@@ -38,7 +38,7 @@ export default function Footer() {
         {" "}
         &copy; {1900 + new Date().getYear()}
         <Text as='span' fontWeight='500' ms='4px'>
-          Qubit. All Rights Reserved.
+         ESGenius. All Rights Reserved.
         </Text>
       </Text>
       <List display='flex'>
@@ -50,7 +50,7 @@ export default function Footer() {
           <Link
             fontWeight='500'
             color={textColor}
-            href='mailto:support@qubit.com'>
+            href='mailto:support@ESGenius.com'>
             Support
           </Link>
         </ListItem>
