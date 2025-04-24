@@ -39,7 +39,7 @@ import { useEffect, useState } from "react";
 import { FiMaximize2 } from 'react-icons/fi';
 import { useLocation, useParams } from "react-router-dom";
 
-export function CompanyDetails() {
+export function ExploreCompanyDetails() {
   const { id } = useParams();
   const location = useLocation();
   const company = location.state?.company;
