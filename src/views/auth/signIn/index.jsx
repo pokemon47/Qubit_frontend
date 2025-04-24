@@ -102,7 +102,7 @@ function SignIn() {
         flexDirection='column'>
         <Box me="auto" textAlign="center">
           <Heading color={textColor} fontSize="36px" mb="10px">
-            Welcome to Qubit
+            Welcome to ESGenius
           </Heading>
           <Text
             mb='36px'
