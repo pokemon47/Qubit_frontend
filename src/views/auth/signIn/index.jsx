@@ -21,8 +21,6 @@
 
 */
 
-import React from "react";
-import { useNavigate } from "react-router-dom";
 import {
   Box,
   Button,
@@ -32,10 +30,11 @@ import {
   Text,
   useColorModeValue,
 } from "@chakra-ui/react";
-import DefaultAuth from "layouts/auth/Default";
 import illustration from "assets/img/auth/auth.png";
-import { FcGoogle } from "react-icons/fc";
 import { useAuth } from 'contexts/AuthContext';
+import DefaultAuth from "layouts/auth/Default";
+import { FcGoogle } from "react-icons/fc";
+import { useNavigate } from "react-router-dom";
 
 function SignIn() {
   const navigate = useNavigate();
@@ -52,9 +51,12 @@ function SignIn() {
     { bg: "secondaryGray.300" },
     { bg: "whiteAlpha.200" }
   );
-
+  function sleep(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms))
+  }
   const handleGoogleSignIn = async () => {
     // TEMPORARY: Direct login without OAuth - REMOVE IN PRODUCTION
+    await sleep(2000)
     await signInWithGoogle();
     navigate('/admin/dashboard');
 
@@ -138,7 +140,7 @@ function SignIn() {
             _focus={googleActive}
             onClick={handleGoogleSignIn}>
             <Icon as={FcGoogle} w='20px' h='20px' me='10px' />
-            Sign in with Google (Dev Mode)
+            Sign in with Google
           </Button>
         </Flex>
       </Flex>

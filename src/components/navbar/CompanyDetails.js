@@ -69,10 +69,7 @@ export function CompanyDetails() {
       growth: 0
     },
     sentiment: {
-      overall: 0,
-      media: 0,
-      social: 0,
-      employees: 0
+      overall: 0
     }
   });
 
@@ -81,6 +78,52 @@ export function CompanyDetails() {
   const cardBg = useColorModeValue("white", "navy.700");
   const secondaryBg = useColorModeValue("gray.50", "navy.800");
   const borderColor = useColorModeValue("gray.200", "gray.700");
+
+
+  const getSentimentScore = async (name) => {
+    try {
+      const response = await fetch(
+        `/company/${encodeURIComponent(name)}?api_key=hrppk6zHXrrFYM3CHqx0_Q`
+      );
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const rawText = await response.text();
+      if (!rawText) return;
+
+      if (rawText.trim().startsWith('<!DOCTYPE') || rawText.trim().startsWith('<')) return;
+
+      const newsData = JSON.parse(rawText);
+      const titles = newsData.events?.slice(0,8).map(event => event.attribute?.title || '').filter(Boolean);
+
+      if (titles.length === 0) {
+        throw new Error("No valid titles found to analyze.");
+      }
+  
+      const predictResponse = await fetch('/predict', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          api_key: '2ieFDTBy6jScWbwZg8Z3qw',
+          titles: titles
+        })
+      });
+  
+      const predictionData = await predictResponse.json();
+  
+      if (!predictResponse.ok) {
+        throw new Error(predictionData.error || "Prediction API failed.");
+      }
+  
+      return predictionData.total;
+    } catch (err) {
+      console.log("getSentimentScore: ", err);
+    }
+  }
 
   useEffect(() => {
     const fetchCompanyDetails = async () => {
@@ -113,6 +156,28 @@ export function CompanyDetails() {
          // Fetch financial score from the new API
          const financialScoreRes = await fetch(`http://170.64.162.86/financial-score?ticker=${symbol}`);
          const financialScoreData = await financialScoreRes.json();
+
+         const titles = newsArticles.slice(0, 1).map(article => article.attribute.title);
+         console.log(titles)
+         var sentiment = 0;
+         if (titles.length > 0) {
+          const predictResponse = await fetch('http://170.64.163.80/predict', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+              api_key: '2ieFDTBy6jScWbwZg8Z3qw',
+              titles: titles
+            })
+            });
+  
+            if (predictResponse.status !== 200) return 'Error'
+  
+            const predictSentiment = await predictResponse.json();
+            sentiment = -1 * Math.round( Number(predictSentiment.total_negative) * 100 );
+            console.log(sentiment);
+         }
          
          // Update company scores with both ESG and financial data
          setCompanyScores(prev => ({
@@ -120,7 +185,10 @@ export function CompanyDetails() {
            esg,
            financial: {
              ...prev.financial,
-             overall: financialScoreData.score
+             overall: Math.round(financialScoreData.score * 100)
+           },
+           sentiment: {
+            overall: sentiment
            }
          }));
          
@@ -436,24 +504,6 @@ export function CompanyDetails() {
                     <StatNumber color="blue.500">{companyScores.financial.overall}</StatNumber>
                   </Stat>
                 </Card>
-                <Card {...scoreCardStyle}>
-                  <Stat>
-                    <StatLabel>Revenue</StatLabel>
-                    <StatNumber color="blue.400">{companyScores.financial.revenue}</StatNumber>
-                  </Stat>
-                </Card>
-                <Card {...scoreCardStyle}>
-                  <Stat>
-                    <StatLabel>Profitability</StatLabel>
-                    <StatNumber color="blue.400">{companyScores.financial.profitability}</StatNumber>
-                  </Stat>
-                </Card>
-                <Card {...scoreCardStyle}>
-                  <Stat>
-                    <StatLabel>Growth</StatLabel>
-                    <StatNumber color="blue.400">{companyScores.financial.growth}</StatNumber>
-                  </Stat>
-                </Card>
               </SimpleGrid>
             </Box>
 
@@ -465,24 +515,6 @@ export function CompanyDetails() {
                   <Stat>
                     <StatLabel>Overall Sentiment</StatLabel>
                     <StatNumber color="purple.500">{companyScores.sentiment.overall}</StatNumber>
-                  </Stat>
-                </Card>
-                <Card {...scoreCardStyle}>
-                  <Stat>
-                    <StatLabel>Media</StatLabel>
-                    <StatNumber color="purple.400">{companyScores.sentiment.media}</StatNumber>
-                  </Stat>
-                </Card>
-                <Card {...scoreCardStyle}>
-                  <Stat>
-                    <StatLabel>Social Media</StatLabel>
-                    <StatNumber color="purple.400">{companyScores.sentiment.social}</StatNumber>
-                  </Stat>
-                </Card>
-                <Card {...scoreCardStyle}>
-                  <Stat>
-                    <StatLabel>Employee</StatLabel>
-                    <StatNumber color="purple.400">{companyScores.sentiment.employees}</StatNumber>
                   </Stat>
                 </Card>
               </SimpleGrid>

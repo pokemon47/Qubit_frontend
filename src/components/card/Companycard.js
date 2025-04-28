@@ -85,10 +85,33 @@ function CompanyCard({ company }) {
         const financialScoreData = await financialScoreRes.json();
         const financial = financialScoreData.score;
         
+        const titles = newsArticles.slice(0, 1).map(article => article.attribute.title);
+        console.log(titles)
+        var sentiment = 0;
+        if (titles.length > 0) {
+         const predictResponse = await fetch('http://170.64.163.80/predict', {
+           method: 'POST',
+           headers: {
+             'Content-Type': 'application/json'
+           },
+           body: JSON.stringify({
+             api_key: '2ieFDTBy6jScWbwZg8Z3qw',
+             titles: titles
+           })
+           });
+ 
+           if (predictResponse.status !== 200) return 'Error'
+ 
+           const predictSentiment = await predictResponse.json();
+           sentiment = -1 * Math.round( Number(predictSentiment.total_negative) * 100 );
+           console.log(sentiment);
+        }
+        
         setScores({
           ... scores,
           esg,
-          financial,  
+          financial,
+          sentiment
         })
       } catch (err) {
         console.error("Failed to fetch company news:", err);

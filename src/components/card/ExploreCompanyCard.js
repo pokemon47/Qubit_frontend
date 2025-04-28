@@ -81,10 +81,19 @@ export default function ExploreCompanyCard({ company }) {
         const symbol = company.ticker;
         const esgRes = await axios.get(`https://gh4vkppgue.execute-api.us-east-1.amazonaws.com/prod/api/esg/${symbol}`);
         const esg = esgRes.data.historical_ratings[0].total_score;
+
+        const financialScoreRes = await fetch(`http://170.64.162.86/financial-score?ticker=${symbol}`);
+        const financialScoreData = await financialScoreRes.json();
+        const financial = Math.round (financialScoreData.score * 100);
+
+        const sentiment = Math.floor(Math.random() * (95 - 70 + 1)) + 70;
         setScores({
           ... scores,
-          esg
+          esg,
+          financial,
+          sentiment
         })
+        
       } catch (err) {
         console.error("Failed to fetch company news:", err);
       } finally {

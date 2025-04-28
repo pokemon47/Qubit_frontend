@@ -99,6 +99,51 @@ export default function Dashboard() {
     return Math.round ( total / arr.length ) ;
   }
 
+  const getSentimentScore = async (name) => {
+    try {
+      const response = await fetch(
+        `/company/${encodeURIComponent(name)}?api_key=hrppk6zHXrrFYM3CHqx0_Q`
+      );
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const rawText = await response.text();
+      if (!rawText) return;
+
+      if (rawText.trim().startsWith('<!DOCTYPE') || rawText.trim().startsWith('<')) return;
+
+      const newsData = JSON.parse(rawText);
+      const titles = newsData.events?.slice(0,8).map(event => event.attribute?.title || '').filter(Boolean);
+
+      if (titles.length === 0) {
+        throw new Error("No valid titles found to analyze.");
+      }
+  
+      const predictResponse = await fetch('/predict', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          api_key: '2ieFDTBy6jScWbwZg8Z3qw',
+          titles: titles
+        })
+      });
+  
+      const predictionData = await predictResponse.json();
+  
+      if (!predictResponse.ok) {
+        throw new Error(predictionData.error || "Prediction API failed.");
+      }
+  
+      return predictionData.total;
+    } catch (err) {
+      console.log("getSentimentScore: ", err);
+    }
+  }
+
   const fetchInitialData = async () => {
     try {
       const updatedCompanies = await Promise.all(
@@ -111,6 +156,12 @@ export default function Dashboard() {
           const esgRes = await axios.get(`https://gh4vkppgue.execute-api.us-east-1.amazonaws.com/prod/api/esg/${symbol}`);
           const esgData = esgRes.data.historical_ratings[0].total_score;
 
+          const financialScoreRes = await fetch(`http://170.64.162.86/financial-score?ticker=${symbol}`);
+          const financialScoreData = await financialScoreRes.json()
+          const financialScore = Math.round ( financialScoreData.score * 100 );
+
+          const sentimentScore = getSentimentScore(name);
+
           return {
             symbol,
             name,
@@ -120,8 +171,8 @@ export default function Dashboard() {
             dailyChangePercent,
             value: currentPrice * units,
             esgScore: 85,
-            financialScore: 78,
-            sentimentScore: 92,
+            financialScore,
+            sentimentScore,
             esg: Math.round(( esgData / 30 ) * 100)
           };
         })
@@ -130,10 +181,16 @@ export default function Dashboard() {
       setCompanies(updatedCompanies);
       const totalValue = updatedCompanies.reduce((sum, c) => sum + c.currentPrice * c.units, 0);
       const avgESG = getAverage(updatedCompanies, "esg");
+
+      const avgFinancial = getAverage(updatedCompanies, "financialScore");
+      const avgSentiment = getAverage(updatedCompanies, "sentimentScore")
+
       setSummaryData(prev => ({
         ...prev,
         totalValue,
-        avgESG
+        avgESG,
+        avgFinancial,
+        avgSentiment
       }));
 
     } catch (err) {
@@ -161,6 +218,12 @@ export default function Dashboard() {
       const esgRes = await axios.get(`https://gh4vkppgue.execute-api.us-east-1.amazonaws.com/prod/api/esg/${symbolUpper}`);
       const esgData = esgRes.data.historical_ratings[0].total_score;
 
+      const financialScoreRes = await fetch(`http://170.64.162.86/financial-score?ticker=${symbol}`);
+      const financialScoreData = await financialScoreRes.json()
+      const financialScore = Math.round ( financialScoreData.score * 100 );
+
+      const sentimentScore = getSentimentScore(name);
+
       if (index !== -1) {
         updatedCompanies[index].units += Number(units);
         updatedCompanies[index].currentPrice = currentPrice;
@@ -178,8 +241,8 @@ export default function Dashboard() {
           dailyChangePercent,
           value: currentPrice * Number(units),
           esgScore: 85,
-          financialScore: 78,
-          sentimentScore: 92,
+          financialScore,
+          sentimentScore,
           esg: Math.round(( esgData / 30 ) * 100)
         });
       }
@@ -188,11 +251,15 @@ export default function Dashboard() {
       console.log(companies);
       const totalValue = updatedCompanies.reduce((sum, c) => sum + c.currentPrice * c.units, 0);
       const avgESG = getAverage(updatedCompanies, "esg");
+      const avgFinancial = getAverage(updatedCompanies, "financialScore");
+      const avgSentiment = getAverage(updatedCompanies, "sentimentScore")
 
       setSummaryData(prev => ({
         ...prev,
         totalValue,
-        avgESG
+        avgESG,
+        avgFinancial,
+        avgSentiment
       }));
 
       setSymbol("");
