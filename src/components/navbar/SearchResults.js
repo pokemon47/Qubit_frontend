@@ -30,28 +30,27 @@ function SearchResults() {
 
   useEffect(() => {
     setLoading(true);
-    
-    // Mock function - replace with your actual API call
+  
     const fetchCompanies = async () => {
       try {
-        // Replace this with your actual API call
-        // const response = await api.searchCompanies(query);
-        // setResults(response.data);
-        
-        // Mocked results for demonstration
-        setTimeout(async () => {
-          const ticker = await getTicker(query);
+        const ticker = await getTicker(query);
+  
+        if (ticker) {
           setResults([
-            { id: 1, name: `${query}`, description: "Description here", industry: "Technology", ticker },
+            { id: ticker, name: query, ticker: ticker }
           ]);
-          setLoading(false);
-        }, 800);
+        } else {
+          // No ticker found, set results to empty
+          setResults([]);
+        }
       } catch (error) {
         console.error("Error fetching search results:", error);
+        setResults([]);
+      } finally {
         setLoading(false);
       }
     };
-
+  
     if (query) {
       fetchCompanies();
     } else {

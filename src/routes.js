@@ -1,11 +1,11 @@
-
 import { Icon } from '@chakra-ui/react';
 import {
   MdBusiness,
   MdHome,
   MdLock,
   MdPerson,
-  MdSearch
+  MdSearch,
+  MdExplore
 } from 'react-icons/md';
 
 // Admin Imports
@@ -13,6 +13,7 @@ import CompanyDetails from 'components/navbar/CompanyDetails';
 import SearchResults from 'components/navbar/SearchResults'; // Import the new search results component
 import Dashboard from 'views/admin/dashboard';
 import Profile from 'views/admin/profile';
+import Explore from 'views/admin/explore';
 
 
 // Auth Imports
@@ -27,8 +28,14 @@ const routes = [
     icon: <Icon as={MdHome} width="20px" height="20px" color="inherit" />,
     component: <Dashboard />,
   },
-
-   {
+  {
+    name: 'Explore',
+    layout: '/admin',
+    path: '/explore',
+    icon: <Icon as={MdExplore} width="20px" height="20px" color="inherit" />,
+    component: <Explore />,
+  },
+  {
     name: 'Search Results',
     layout: '/admin',
     path: '/search-results',
@@ -51,6 +58,7 @@ const routes = [
     path: '/profile',
     icon: <Icon as={MdPerson} width="20px" height="20px" color="inherit" />,
     component: <Profile />,
+    hideInNav: true
   },
   {
     name: 'Sign In',
@@ -58,6 +66,7 @@ const routes = [
     path: '/sign-in',
     icon: <Icon as={MdLock} width="20px" height="20px" color="inherit" />,
     component: <SignInCentered />,
+    hideInNav: true
   },
   {
     name: 'Auth Callback',
