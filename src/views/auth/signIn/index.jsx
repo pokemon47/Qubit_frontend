@@ -31,14 +31,17 @@ import {
   Icon,
   Text,
   useColorModeValue,
+  useToast,
 } from "@chakra-ui/react";
 import DefaultAuth from "layouts/auth/Default";
 import illustration from "assets/img/auth/auth.png";
 import { FcGoogle } from "react-icons/fc";
 import { useAuth } from 'contexts/AuthContext';
+import { generateCodeChallenge } from "utils/oauth";
 
 function SignIn() {
   const navigate = useNavigate();
+  const toast = useToast();
   const { signInWithGoogle } = useAuth();
   
   const textColor = useColorModeValue("navy.700", "white");
@@ -54,11 +57,6 @@ function SignIn() {
   );
 
   const handleGoogleSignIn = async () => {
-    // TEMPORARY: Direct login without OAuth - REMOVE IN PRODUCTION
-    await signInWithGoogle();
-    navigate('/admin/dashboard');
-
-    /* UNCOMMENT THIS IN PRODUCTION
     try {
       const codeChallenge = await generateCodeChallenge();
       
@@ -83,7 +81,6 @@ function SignIn() {
         isClosable: true,
       });
     }
-    */
   };
 
   return (
@@ -138,7 +135,7 @@ function SignIn() {
             _focus={googleActive}
             onClick={handleGoogleSignIn}>
             <Icon as={FcGoogle} w='20px' h='20px' me='10px' />
-            Sign in with Google (Dev Mode)
+            Sign in with Google
           </Button>
         </Flex>
       </Flex>

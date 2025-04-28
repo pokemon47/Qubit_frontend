@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
+import { API_URL } from '../config';
 
 const AuthContext = createContext(null);
 
@@ -14,14 +15,9 @@ export const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // TEMPORARY: Skip auth check in development - REMOVE IN PRODUCTION
-    setUser(MOCK_USER);
-    setLoading(false);
-
-    /* UNCOMMENT THIS IN PRODUCTION
     const checkAuth = async () => {
       try {
-        const response = await fetch('/api/auth/verify', {
+        const response = await fetch(`${API_URL}/api/auth/verify`, {
           credentials: 'include',
         });
         
@@ -37,17 +33,11 @@ export const AuthProvider = ({ children }) => {
     };
 
     checkAuth();
-    */
   }, []);
 
   const signInWithGoogle = async (code, codeVerifier) => {
-    // TEMPORARY: Auto-login in development - REMOVE IN PRODUCTION
-    setUser(MOCK_USER);
-    return true;
-
-    /* UNCOMMENT THIS IN PRODUCTION
     try {
-      const response = await fetch('/api/auth/google', {
+      const response = await fetch(`${API_URL}/api/auth/google`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -70,17 +60,11 @@ export const AuthProvider = ({ children }) => {
       console.error('Google sign in failed:', error);
       return false;
     }
-    */
   };
 
   const signOut = async () => {
-    // TEMPORARY: Simple logout in development - REMOVE IN PRODUCTION
-    setUser(null);
-    return true;
-
-    /* UNCOMMENT THIS IN PRODUCTION
     try {
-      await fetch('/api/auth/logout', {
+      await fetch(`${API_URL}/api/auth/logout`, {
         method: 'POST',
         credentials: 'include',
       });
@@ -90,7 +74,6 @@ export const AuthProvider = ({ children }) => {
       console.error('Sign out failed:', error);
       return false;
     }
-    */
   };
 
   const value = {

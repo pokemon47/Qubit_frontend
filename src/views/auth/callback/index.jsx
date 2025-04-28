@@ -38,7 +38,6 @@ function AuthCallback() {
           throw new Error('Code verifier not found');
         }
 
-        // Send the code and verifier to your backend
         const success = await signInWithGoogle(code, codeVerifier);
         if (success) {
           navigate('/admin/dashboard');
