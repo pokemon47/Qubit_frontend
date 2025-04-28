@@ -5,44 +5,15 @@ import {
   Box,
 } from "@chakra-ui/react";
 import { SearchBar } from "components/navbar/searchBar/SearchBar";
-import ExploreCompanyCard from "components/card/ExploreCompanyCard";
-import { useState } from "react";
+import CompanyCard from "components/card/Companycard";
 
 export default function Explore() {
-  // Mock data for company cards
   const mockCompanies = [
-    {
-      id: 1,
-      name: "Apple Inc.",
-      cname: "Apple",
-      ticker: "AAPL",
-      industry: "Technology",
-      description: "Apple Inc. designs, manufactures, and markets smartphones, personal computers, tablets, wearables, and accessories worldwide."
-    },
-    {
-      id: 2,
-      name: "Microsoft Corporation",
-      cname: "Microsoft",
-      ticker: "MSFT",
-      industry: "Technology",
-      description: "Microsoft Corporation develops, licenses, and supports software, services, devices, and solutions worldwide."
-    },
-    {
-      id: 3,
-      name: "Amazon Inc.",
-      cname: "Amazon",
-      ticker: "AMZN",
-      industry: "E-commerce",
-      description: "Amazon.com, Inc. engages in the retail sale of consumer products and subscriptions worldwide."
-    },
-    {
-      id: 4,
-      name: "Alphabet Inc.",
-      cname: "Google",
-      ticker: "GOOGL",
-      industry: "Technology",
-      description: "Alphabet Inc. provides various products and platforms in the United States, Europe, the Middle East, Africa, and Asia Pacific."
-    }
+    { companyName: "Apple", ticker: "AAPL" },
+    { companyName: "Microsoft", ticker: "MSFT" },
+    { companyName: "Amazon", ticker: "AMZN" },
+    { companyName: "Google", ticker: "GOOGL" },
+    { companyName: "Meta", ticker: "META" },
   ];
 
   return (
@@ -54,9 +25,9 @@ export default function Explore() {
 
       <SimpleGrid columns={{ base: 1, md: 2, lg: 3 }} spacing={6}>
         {mockCompanies.map(company => (
-          <ExploreCompanyCard key={company.id} company={company} />
+          <CompanyCard key={company.name} company={company} />
         ))}
       </SimpleGrid>
     </Container>
   );
-} 
+}

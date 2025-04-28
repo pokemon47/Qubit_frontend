@@ -30,18 +30,37 @@ function CompanyCard({ company }) {
     financial: 0,
     sentiment: 0
   });
-  
-  
-  // Mock scores - will be replaced with real data later
-//   const exampleScores = {
-//     esg: 82,
-//     financial: 76,
-//     sentiment: 88,
-//   };
+
+  // Company Profile State
+  const [companyName, setCompanyName] = useState(company.name);
+  const [companyIndustry, setCompanyIndustry] = useState(company.industry);
+  const [companyDescription, setCompanyDescription] = useState(company.description);
+
 
   // News state
   const [newsArticles, setNewsArticles] = useState([]);
   const [loadingNews, setLoadingNews] = useState(true);
+
+
+  useEffect(() => {
+    const fetchCompanyProfile = async () => {
+      try {
+        const response = await fetch(`https://financialmodelingprep.com/api/v3/profile/${company.ticker}?apikey=oFYyPHWTk9rKrTMI976B0jk9OiVCaTe8`);
+        const data = await response.json();
+
+        if (data && data.length > 0) {
+          const profile = data[0];
+          setCompanyName(profile.companyName);
+          setCompanyIndustry(profile.industry);
+          setCompanyDescription(profile.description);
+        }
+      } catch (error) {
+        console.error("Error fetching company profile:", error);
+      }
+    };
+
+    fetchCompanyProfile();
+  }, [company.ticker]);
 
   useEffect(() => {
     const fetchNews = async () => {
@@ -101,10 +120,10 @@ function CompanyCard({ company }) {
   }, [company.name]);
 
   const handleViewDetails = () => {
-    console.log("Navigating to company ID:", company.id);
-    // navigate(`/admin/company/${company.id}`);
-    navigate(`/admin/company/${company.id}`, { state: { company } });
+    console.log("Navigating to company ticker:", company.ticker);
+    navigate(`/admin/company/${company.ticker}`, { state: { company } });
   };
+  
 
   // Format date function
   const formatDateTime = (timestamp) => {
@@ -148,15 +167,20 @@ function CompanyCard({ company }) {
       <Flex direction="column" flex="1">
         {/* Company Header */}
         <Heading as="h4" size="md" color={textColor} fontWeight="700" mb="10px">
-          {company.name}
+          {companyName}
         </Heading>
-        <Text color="gray.500" fontSize="sm" fontWeight="500" mb="10px">
-          {company.industry}
-        </Text>
+        <Flex gap={2} mb="10px">
+          <Badge colorScheme="blue" alignSelf="flex-start">
+            {company.ticker}
+          </Badge>
+          <Badge colorScheme="green" alignSelf="flex-start">
+            {companyIndustry}
+          </Badge>
+        </Flex>
         <Text color="gray.600" fontSize="md" mb="20px" noOfLines={3}>
-          {company.description}
+          {companyDescription}
         </Text>
-
+  
         {/* Scores Section */}
         <Heading size="xs" color="gray.600" mb={3}>COMPANY SCORES</Heading>
         <SimpleGrid columns={3} spacing={4} mb={6}>
@@ -173,9 +197,9 @@ function CompanyCard({ company }) {
             <Text fontWeight="bold" fontSize="xl" color="purple.500">{scores.sentiment}</Text>
           </Box>
         </SimpleGrid>
-
+  
         <Divider my={4} />
-
+  
         {/* News Section */}
         <Box mb={5} flex="1">
           <Flex justify="space-between" align="center" mb={3}>
@@ -232,7 +256,7 @@ function CompanyCard({ company }) {
             </Box>
           )}
         </Box>
-
+  
         {/* Button */}
         <Button
           variant="darkBrand"

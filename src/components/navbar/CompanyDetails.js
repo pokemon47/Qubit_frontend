@@ -40,16 +40,23 @@ import { FiMaximize2 } from 'react-icons/fi';
 import { useLocation, useParams } from "react-router-dom";
 
 export function CompanyDetails() {
-  const { id } = useParams();
+  // const { ticker } = useParams(); 
   const location = useLocation();
   const company = location.state?.company;
   const [loading, setLoading] = useState(true);
   const [newsArticles, setNewsArticles] = useState([]);
   const [loadingNews, setLoadingNews] = useState(true);
-  const [ticker, setTicker] = useState(null);
+  //const [ticker, setTicker] = useState(null);
   const [fromDate, setFromDate] = useState('');
   const [toDate, setToDate] = useState('');
   const [tickerError, setTickerError] = useState(null);
+  const [ticker, setTicker] = useState(null);
+
+  // Company Profile State
+  const [companyName, setCompanyName] = useState(company?.name || '');
+  const [companyIndustry, setCompanyIndustry] = useState(company?.industry || '');
+  const [companyDescription, setCompanyDescription] = useState(company?.description || '');
+
   
   const [lineChartData, setLineChartData] = useState([]);
   const [lineChartOptions, setLineChartOptions] = useState({});
@@ -85,13 +92,21 @@ export function CompanyDetails() {
   useEffect(() => {
     const fetchCompanyDetails = async () => {
       try {
-        if (!company?.name) return;
+        if (!company?.name && !company?.ticker) return;
 
-        const cleanedCompanyName = company.name.replace(/\./g, ' ').trim();
-        console.log(cleanedCompanyName);
-        const tickerRes = await fetch(`/convert/company_to_ticker?name=${encodeURIComponent(cleanedCompanyName)}`);
-        const tickerData = await tickerRes.json();
-        const symbol = tickerData?.ticker;
+        let symbol = company?.ticker; // Default to company's ticker
+        if (!symbol) {
+          // If no ticker is found, attempt to fetch it using the company name
+          const cleanedCompanyName = company.name.replace(/\./g, ' ').trim();
+          const tickerRes = await fetch(`/convert/company_to_ticker?name=${encodeURIComponent(cleanedCompanyName)}`);
+      
+          if (!tickerRes.ok) {
+            throw new Error("Failed to fetch ticker data.");
+          }
+      
+          const tickerData = await tickerRes.json();
+          symbol = tickerData.ticker; // Update symbol with the fetched ticker
+        }
 
         if (!symbol) {
           setTickerError("Ticker not found");
@@ -99,6 +114,16 @@ export function CompanyDetails() {
         }
 
         setTicker(symbol);
+
+        const profileResponse = await fetch(`https://financialmodelingprep.com/api/v3/profile/${symbol}?apikey=oFYyPHWTk9rKrTMI976B0jk9OiVCaTe8`);
+        const profileData = await profileResponse.json();
+
+        if (profileData && profileData.length > 0) {
+          const profile = profileData[0];
+          setCompanyName(profile.companyName);
+          setCompanyIndustry(profile.industry);
+          setCompanyDescription(profile.description);
+        }
 
         const response = await axios.get(`https://gh4vkppgue.execute-api.us-east-1.amazonaws.com/prod/api/esg/${symbol}`);
         const esgData = response.data.historical_ratings[0];
@@ -171,12 +196,12 @@ export function CompanyDetails() {
     };
 
     fetchCompanyDetails();
-  }, [id, company?.name]);
+  }, company?.name);
 
   useEffect(() => {
     const fetchNews = async () => {
       try {
-        if (!company?.name) return;
+        if (!company?.name && !company?.ticker) return;
 
         const response = await fetch(
           `/company/${encodeURIComponent(company.name)}?api_key=hrppk6zHXrrFYM3CHqx0_Q`
@@ -259,10 +284,13 @@ export function CompanyDetails() {
       
       {/* Company Header */}
       <Box mb={10}>
-        <Heading as="h1" size="xl" mb={3}>{company?.name}</Heading>
-        <Badge colorScheme="blue" mb={4}>{company?.industry}</Badge>
+        <Heading as="h1" size="xl" mb={3}>{companyName}</Heading>
+          <Flex gap={2} mb={4}>
+            <Badge colorScheme="blue">{company?.ticker}</Badge>
+            <Badge colorScheme="green">{companyIndustry}</Badge>
+          </Flex>
         <Text color="gray.600" fontSize="md">
-          {company?.description}
+        {companyDescription}
         </Text>
       </Box>
 
@@ -308,7 +336,7 @@ export function CompanyDetails() {
             <Box mb={16}>
               <Flex align="center" justify="space-between" mb={6}>
                 <Heading as="h3" size="md">Stock Price Chart</Heading>
-                {ticker && (
+                {company?.ticker && (
                   <IconButton
                     aria-label="Expand chart"
                     icon={<FiMaximize2 />}
@@ -321,8 +349,8 @@ export function CompanyDetails() {
                 )}
               </Flex>
               <Box height="400px" mb={4} position="relative">
-                {ticker ? (
-                  <StockChart symbol={ticker} from={fromDate} to={toDate} />
+                {company?.ticker ? (
+                  <StockChart symbol={company?.ticker} from={fromDate} to={toDate} />
                 ) : tickerError ? (
                   <Text color="red.500">{tickerError}</Text>
                 ) : (
@@ -436,24 +464,6 @@ export function CompanyDetails() {
                     <StatNumber color="blue.500">{companyScores.financial.overall}</StatNumber>
                   </Stat>
                 </Card>
-                <Card {...scoreCardStyle}>
-                  <Stat>
-                    <StatLabel>Revenue</StatLabel>
-                    <StatNumber color="blue.400">{companyScores.financial.revenue}</StatNumber>
-                  </Stat>
-                </Card>
-                <Card {...scoreCardStyle}>
-                  <Stat>
-                    <StatLabel>Profitability</StatLabel>
-                    <StatNumber color="blue.400">{companyScores.financial.profitability}</StatNumber>
-                  </Stat>
-                </Card>
-                <Card {...scoreCardStyle}>
-                  <Stat>
-                    <StatLabel>Growth</StatLabel>
-                    <StatNumber color="blue.400">{companyScores.financial.growth}</StatNumber>
-                  </Stat>
-                </Card>
               </SimpleGrid>
             </Box>
 
@@ -465,24 +475,6 @@ export function CompanyDetails() {
                   <Stat>
                     <StatLabel>Overall Sentiment</StatLabel>
                     <StatNumber color="purple.500">{companyScores.sentiment.overall}</StatNumber>
-                  </Stat>
-                </Card>
-                <Card {...scoreCardStyle}>
-                  <Stat>
-                    <StatLabel>Media</StatLabel>
-                    <StatNumber color="purple.400">{companyScores.sentiment.media}</StatNumber>
-                  </Stat>
-                </Card>
-                <Card {...scoreCardStyle}>
-                  <Stat>
-                    <StatLabel>Social Media</StatLabel>
-                    <StatNumber color="purple.400">{companyScores.sentiment.social}</StatNumber>
-                  </Stat>
-                </Card>
-                <Card {...scoreCardStyle}>
-                  <Stat>
-                    <StatLabel>Employee</StatLabel>
-                    <StatNumber color="purple.400">{companyScores.sentiment.employees}</StatNumber>
                   </Stat>
                 </Card>
               </SimpleGrid>
@@ -556,13 +548,13 @@ export function CompanyDetails() {
         <ModalOverlay />
         <ModalContent maxW="900px">
           <ModalHeader>
-            {ticker && `${company?.name} (${ticker}) Stock Chart`}
+            {company?.ticker && `${company?.name} (${company?.ticker}) Stock Chart`}
           </ModalHeader>
           <ModalCloseButton />
           <ModalBody>
             <Box height="600px">
-              {ticker && (
-                <StockChart symbol={ticker} from={fromDate} to={toDate} />
+              {company?.ticker && (
+                <StockChart symbol={company?.ticker} from={fromDate} to={toDate} />
               )}
             </Box>
           </ModalBody>
